@@ -1,3 +1,43 @@
+#import "OCFWebServerRequest_Types.h"
+
+@class																								  OCFWebServerRequest;
+typedef									void(^OCFWebServerProcessBlock)(OCFWebServerRequest* request);
+typedef OCFWebServerRequest*(^OCFWebServerMatchBlock  )(NSString* requestMethod,		  NSURL* requestURL,
+																												NSDictionary* requestHeaders, NSString* urlPath, NSDictionary* urlQuery);
+@interface OCFWebServer : NSObject
+@property (nonatomic)	BOOL   running;
+@property		    NSUInteger   port;
+@property (copy)  NSString * bonjourName, *subpath;
+
+#pragma mark - OCFWebServer
+
+-         (void) removeAllHandlers;
++ (instancetype) serverOnPort:(NSUInteger)p bonjourName:(NSString*)n subPath:(NSString*)s maxConnections:(NSUInteger)m;
+
+- (void) addHandlerWithMatchBlock:(OCFWebServerMatchBlock)matchBlock
+										 processBlock:(OCFWebServerProcessBlock)processBlock;
+@end
+
+@interface OCFWebServer (Subclassing)
++     (Class) connectionClass;
++ (NSString*) serverName;  // Default is class name
+@end
+@interface OCFWebServer (Extensions)
+- (BOOL)runWithPort:(NSUInteger)port;  // Starts then automatically stops on SIGINT i.e. Ctrl-C (use on main thread only)
+@end
+@interface OCFWebServer (Handlers)
+- (void) addDefaultHandlerForMethod:(NSString*)method																		 requestClass:(Class)class processBlock:(OCFWebServerProcessBlock)block;
+- (void) addHandlerForMethod:				(NSString*)method		  		path:(NSString*)path			 requestClass:(Class)class processBlock:(OCFWebServerProcessBlock)block;  // Path is case-insensitive
+- (void) addHandlerForMethod:				(NSString*)method    pathRegex:(NSString*)regex      requestClass:(Class)class processBlock:(OCFWebServerProcessBlock)block;  // Regular expression is case-insensitive
+- (void) addHandlerForBasePath:			(NSString*)basePath  localPath:(NSString*)localPath indexFilename:(NSString*)indexFilename    cacheAge:(NSUInteger)cacheAge;  // Base path is recursive and case-sensitive
+@end
+
+
+//- (void) stop;
+//- (BOOL) start;																												// Default is 8080 port and computer name
+//- (BOOL) startWithPort:(NSUInteger)port bonjourName:(NSString*)name;  // Pass nil name to disable Bonjour or empty string to use computer name
+//- (BOOL) startWithPort:(NSUInteger)port bonjourName:(NSString*)name subPath:(NSString*)subPath;  // Pass nil name to disable Bonjour or empty string to use computer name
+
 /*
  This file belongs to the OCFWebServer project. OCFWebServer is a fork of GCDWebServer (originally developed by
  Pierre-Olivier Latour). We have forked GCDWebServer because we made extensive and incompatible changes to it.
@@ -33,43 +73,3 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#import "OCFWebServerRequest_Types.h"
-
-@class OCFWebServerRequest;
-
-typedef OCFWebServerRequest*(^OCFWebServerMatchBlock)(NSString* requestMethod, NSURL* requestURL, NSDictionary* requestHeaders, NSString* urlPath, NSDictionary* urlQuery);
-typedef void(^OCFWebServerProcessBlock)(OCFWebServerRequest* request);
-
-@interface OCFWebServer : NSObject
-
-#pragma mark - Properties
-@property (nonatomic, assign, readonly, getter=isRunning) BOOL running;
-@property (nonatomic, assign, readonly) NSUInteger port;
-@property (nonatomic, assign, readonly) NSUInteger maxPendingConnections; // default: 16
-
-#pragma mark - OCFWebServer
-- (void)addHandlerWithMatchBlock:(OCFWebServerMatchBlock)matchBlock processBlock:(OCFWebServerProcessBlock)processBlock;
-- (void)removeAllHandlers;
-
-- (BOOL)start;  // Default is 8080 port and computer name
-- (BOOL)startWithPort:(NSUInteger)port bonjourName:(NSString*)name;  // Pass nil name to disable Bonjour or empty string to use computer name
-- (BOOL)startWithPort:(NSUInteger)port bonjourName:(NSString*)name maxPendingConnections:(NSUInteger)maxPendingConnections;
-- (void)stop;
-
-@end
-
-@interface OCFWebServer (Subclassing)
-+ (Class)connectionClass;
-+ (NSString*)serverName;  // Default is class name
-@end
-
-@interface OCFWebServer (Extensions)
-- (BOOL)runWithPort:(NSUInteger)port;  // Starts then automatically stops on SIGINT i.e. Ctrl-C (use on main thread only)
-@end
-
-@interface OCFWebServer (Handlers)
-- (void)addDefaultHandlerForMethod:(NSString*)method requestClass:(Class)class processBlock:(OCFWebServerProcessBlock)block;
-- (void)addHandlerForBasePath:(NSString*)basePath localPath:(NSString*)localPath indexFilename:(NSString*)indexFilename cacheAge:(NSUInteger)cacheAge;  // Base path is recursive and case-sensitive
-- (void)addHandlerForMethod:(NSString*)method path:(NSString*)path requestClass:(Class)class processBlock:(OCFWebServerProcessBlock)block;  // Path is case-insensitive
-- (void)addHandlerForMethod:(NSString*)method pathRegex:(NSString*)regex requestClass:(Class)class processBlock:(OCFWebServerProcessBlock)block;  // Regular expression is case-insensitive
-@end

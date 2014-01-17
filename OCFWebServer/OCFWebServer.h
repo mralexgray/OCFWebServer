@@ -14,13 +14,16 @@ typedef OCFWebServerRequest*(^OCFWebServerMatchBlock  )(NSString* requestMethod,
 -         (void) removeAllHandlers;
 + (instancetype) serverOnPort:(NSUInteger)p bonjourName:(NSString*)n subPath:(NSString*)s maxConnections:(NSUInteger)m;
 
+- (BOOL) startWithPort:(NSUInteger)port bonjourName:(NSString*)name;  // Pass nil name to disable Bonjour or empty string to use computer name
+- (BOOL) startWithPort:(NSUInteger)port bonjourName:(NSString*)name subPath:(NSString*)subPath;  // Pass nil name to disable Bonjour or empty string to use computer name
+
 - (void) addHandlerWithMatchBlock:(OCFWebServerMatchBlock)matchBlock
 										 processBlock:(OCFWebServerProcessBlock)processBlock;
 @end
 
 @interface OCFWebServer (Subclassing)
 +     (Class) connectionClass;
-+ (NSString*) serverName;  // Default is class name
++ (NSString*) serverName;								// Default is class name
 @end
 @interface OCFWebServer (Extensions)
 - (BOOL)runWithPort:(NSUInteger)port;  // Starts then automatically stops on SIGINT i.e. Ctrl-C (use on main thread only)
@@ -35,8 +38,6 @@ typedef OCFWebServerRequest*(^OCFWebServerMatchBlock  )(NSString* requestMethod,
 
 //- (void) stop;
 //- (BOOL) start;																												// Default is 8080 port and computer name
-//- (BOOL) startWithPort:(NSUInteger)port bonjourName:(NSString*)name;  // Pass nil name to disable Bonjour or empty string to use computer name
-//- (BOOL) startWithPort:(NSUInteger)port bonjourName:(NSString*)name subPath:(NSString*)subPath;  // Pass nil name to disable Bonjour or empty string to use computer name
 
 /*
  This file belongs to the OCFWebServer project. OCFWebServer is a fork of GCDWebServer (originally developed by

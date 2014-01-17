@@ -90,11 +90,11 @@ NSDictionary * OCFWebServerParseURLEncodedForm		 (NSString* form)				{
 
 static void _NetServiceClientCallBack(CFNetServiceRef service, CFStreamError* error, void* info) {
 	@autoreleasepool {  if (error->error) LOG_ERROR(@"Bonjour error %i (domain %i)", error->error, (int)error->domain);
-	else							LOG_VERBOSE(@"Registered Bonjour service \"%@\" with type '%@' on port %i", CFNetServiceGetName(service), CFNetServiceGetType(service), CFNetServiceGetPortNumber(service));
+	else							                    LOG_VERBOSE(@"Registered Bonjour service \"%@\" with type '%@' on port %i with Path:%@", CFNetServiceGetName(service), CFNetServiceGetType(service), CFNetServiceGetPortNumber(service),  CFNetServiceCreateDictionaryWithTXTData(kCFAllocatorDefault,CFNetServiceGetTXTData(service)));
 	}
 }
 
-- (void) setRunning:(BOOL)running { if (_running == running) return;  else if (running) { [self startWithPort:8080 bonjourName:@"" subPath:nil maxPendingConnections:16]; return; }
+- (void) setRunning:(BOOL)running { if (_running == running) return;  else if (running) { [self startWithPort:8080 bonjourName:@"" subPath:_subpath ?: @"/persons/" maxPendingConnections:16]; return; }
 
 	DCHECK(self.source != nil);
 
@@ -109,7 +109,7 @@ static void _NetServiceClientCallBack(CFNetServiceRef service, CFStreamError* er
 	self.port = 0;
 	_running = NO;
 }
-//- (BOOL)startWithPort:(NSUInteger)port bonjourName:(NSString *)name { return [self startWithPort:port bonjourName:name maxPendingConnections:16];
+- (BOOL)startWithPort:(NSUInteger)port bonjourName:(NSString *)name { return [self startWithPort:port bonjourName:name maxPendingConnections:16];
 
 - (BOOL)startWithPort:(NSUInteger)port bonjourName:(NSString*)name subPath:(NSString*)path maxPendingConnections:(NSUInteger)maxPendingConnections {
 
